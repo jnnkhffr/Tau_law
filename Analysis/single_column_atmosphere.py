@@ -13,6 +13,8 @@ def create_vertical_profile(surface_temperature: float):
     '''
     Sets up basic atmosphere profiles for temperature and water vapor mixing ratio for every pressure level.
     Takes surface temperature as argument.
+    :param surface_temperature: Surface temperature in Kelvin
+    :return: temperature profile  and water_vapor_volume_mixing_ratio
     '''
 
     # create empty arrays to store data
