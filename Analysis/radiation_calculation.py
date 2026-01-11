@@ -10,19 +10,14 @@ import typhon
 # Download ARTS catalogs if they are not already present
 pa.data.download()
 
-mixing_ratio_co2 = 400e-6
+MIXING_RATIO_CO2 = 400e-6
 
-mixing_ratio_o3 = 1e-6
+MIXING_RATIO_O3 = 1e-6
 
-t_surf = 290 # K
+T_SURF = 290 # K
 
 KAYSER_GRID = np.linspace(1, 2000, 200)  # in Kayser (cm^-1)
 FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
-
-# Set up a simple atmosphere
-t_profile, wmr_profile, pressure_levels = sca.create_vertical_profile(t_surf)
-HEIGHTS = typhon.physics.pressure2height(pressure_levels)  # meters, needs to increase
-
 
 def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentration):
     '''
@@ -35,15 +30,17 @@ def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentra
     :return: xarray dataset of our atmosphere profile
     '''
 
+    heights = typhon.physics.pressure2height(pressure_profile)
+
     atm = xr.Dataset(
         {
             "t": ("alt", temp_profile),
             "p": ("alt", pressure_profile),
             "H2O": ("alt", H20_profile),
-            "O3": ('alt', np.ones_like(pressure_levels) * mixing_ratio_o3),
-            "CO2": ('alt', np.ones_like(pressure_levels) * CO2_concentration),
+            "O3": ('alt', np.ones_like(pressure_profile) * MIXING_RATIO_O3),
+            "CO2": ('alt', np.ones_like(pressure_profile) * CO2_concentration),
         },
-        coords={"alt": HEIGHTS, "lat": 0, "lon": 0},
+        coords={"alt": heights, "lat": 0, "lon": 0},
     )
 
     atm["t"].attrs = {
@@ -137,7 +134,7 @@ def plot_ola(spectral_radiance, flux):
 
     ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
     ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
-    ax.set_title(f"Clear sky OLA radiance, O3_mr = {mixing_ratio_o3}, CO2_mr = {mixing_ratio_co2}")
+    ax.set_title(f"Clear sky OLA radiance, O3_mr = {MIXING_RATIO_O3}, CO2_mr = {MIXING_RATIO_CO2}")
     ax.text(
         0.98, 0.98,  # X and Y coordinates (in axes fraction)
         f"Total OLA = {flux:.2f} W/m²",  # Text to display
@@ -155,9 +152,15 @@ def plot_ola(spectral_radiance, flux):
 
 def main():
 
-    atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, mixing_ratio_co2)
+    # set up atmosphere
+    t_profile, wmr_profile, pressure_levels = sca.create_vertical_profile(T_SURF)
+    atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
+
+    # radiation calculations
     spectral_radiance_toa = calculate_spectral_csa_emission(atmosphere)
     total_flux = calculate_total_flux(spectral_radiance_toa)
+
+    # plot results
     plot_ola(spectral_radiance_toa, total_flux)
 
 if __name__ == "__main__":
