@@ -70,7 +70,7 @@ def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentra
     }
     return atm
 
-def calculate_radiation_transfer(atmosphere):
+def set_up_workspace(atmosphere):
 
     # Create a pyarts workspace
     ws = pa.Workspace()
@@ -115,26 +115,34 @@ def calculate_radiation_transfer(atmosphere):
     ws.propagation_matrix_agendaAuto()
 
     # this doesn't raise an error but I have no idea what it does
-    abs = pa.recipe.SingleSpeciesAbsorption(species="H2O")
+    pa.recipe.SingleSpeciesAbsorption(species="H2O")
 
     # Set up geometry of observation
     pos = [100e3, 0, 0]
     los = [180.0, 0.0]
     ws.ray_pathGeometric(pos=pos, los=los, max_step=1000.0)
     ws.spectral_radianceClearskyEmission()
-    return ws.spectral_radiance, abs, ws
+    return ws
+
+def calculate_spectral_radiance(workspace):
+    return workspace.spectral_radiance
 
 def calculate_total_flux(spectral_radiance):
     return np.trapezoid(spectral_radiance[:, 0], FREQ_GRID) * np.pi
 
-def calculate_absorption_coefficient(absorption, pressure_profile, atmosphere, ws):
+def calculate_absorption_coefficient(pressure_profile, workspace):
+
+    # this doesn't raise an error, but I have no idea what it does
+    absorption = pa.recipe.SingleSpeciesAbsorption(species="H2O")
 
     heights = typhon.physics.pressure2height(pressure_profile)
     absorption_coefficient = []
 
     for h in heights:
-        atm_point = ws.atmospheric_field(h, 0, 0)
+        atm_point = workspace.atmospheric_field(h, 0, 0)
+        print(f"atm_point: {atm_point}")
         absorption_coefficient.append(absorption(FREQ_GRID, atm_point))
+        print(f"absorption coefficient: {absorption_coefficient}")
 
     absorption_coefficient = np.array(absorption_coefficient)
     return absorption_coefficient
@@ -171,10 +179,11 @@ def main():
     atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
 
     # radiation calculations
-    spectral_radiance_toa, absorption, workspace = calculate_radiation_transfer(atmosphere)
-    total_flux = calculate_total_flux(spectral_radiance_toa)
-    absorption_coeff = calculate_absorption_coefficient(absorption, pressure_levels, atmosphere, workspace)
+    working_space = set_up_workspace(atmosphere) #pyarts workspace with our atmosphere
+    spectral_radiance_toa = calculate_spectral_radiance(working_space)
 
+    total_flux = calculate_total_flux(spectral_radiance_toa)
+    absorption_coeff = calculate_absorption_coefficient(pressure_levels, working_space)
 
     # plot results
     #plot_ola(spectral_radiance_toa, total_flux)
