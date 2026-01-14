@@ -109,6 +109,8 @@ def set_up_workspace(atmosphere):
         ws.absorption_bands[band].cutoff_value = cutoff
 
     # Remove 90% of the lines to speed up the calculation
+    # Aus dieser Zeile kommen die ganzen Ausgaben wie O2-626, QuantumLevelIdentifiere...
+    # Der Hitran Katalog gibt diese Listen aus.
     ws.absorption_bands.keep_hitran_s(approximate_percentile=90)
 
     # Automatically set up the methods to compute absorption coefficients
