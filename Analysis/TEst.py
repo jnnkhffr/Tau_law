@@ -8,65 +8,48 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+import xarray as xr
+import typhon
 import pyarts3 as pa
 
-# Download ARTS catalogs if they are not already present
+import single_column_atmosphere as sca
 pa.data.download()
 
-# ARTS workspace
-ws = pa.workspace.Workspace()
+MIXING_RATIO_CO2 = 400e-6
+MIXING_RATIO_O3 = 1e-6
+T_SURF = 290  # K
 
-# Set up frequency grid
-kayser_grid = np.linspace(1, 2000, 200)  # in Kayser (cm^-1)
-ws.frequency_grid = pa.arts.convert.kaycm2freq(kayser_grid)  # in Hz
+KAYSER_GRID = np.linspace(1, 2000, 200)
+FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
 
-# Select absorption species and continuum model
-# This example uses a reduced set of species to speed up the calculation.
-# Use the second line for a more realistic setup.
-ws.absorption_speciesSet(
-    species=["H2O-161, H2O-ForeignContCKDMT400, H2O-SelfContCKDMT400", "CO2-626"]
-)
-# ws.absorption_speciesSet(
-#     species=["H2O, H2O-ForeignContCKDMT400, H2O-SelfContCKDMT400", "CO2", "O3"]
-# )
+def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentration):
 
-# Read spectral line data from ARTS catalog
-ws.ReadCatalogData()
+    heights = typhon.physics.pressure2height(pressure_profile)
 
-# Apply a frequency cutoff. To be consistent with the CKD water vapor continuum,
-# a cutoff of 25 Kayser is necessary. We set it here for all species, because it
-# also speeds up the calculation.
-cutoff = pa.arts.convert.kaycm2freq(25)
-for band in ws.absorption_bands:
-    ws.absorption_bands[band].cutoff = "ByLine"
-    ws.absorption_bands[band].cutoff_value = cutoff
+    atm = xr.Dataset(
+        {
+            "t": ("alt", temp_profile),
+            "p": ("alt", pressure_profile),
+            "H2O": ("alt", H20_profile),
+            "O3": ('alt', np.ones_like(pressure_profile) * MIXING_RATIO_O3),
+            "CO2": ('alt', np.ones_like(pressure_profile) * CO2_concentration),
+        },
+        coords={"alt": heights, "lat": 0, "lon": 0},
+    )
 
-# Remove 90% of the lines to speed up the calculation
-ws.absorption_bands.keep_hitran_s(approximate_percentile=90)
+    return atm
 
-# Automatically set up the methods to compute absorption coefficients
-ws.propagation_matrix_agendaAuto()
+t_profile, wmr_profile, pressure_levels = sca.create_vertical_profile(T_SURF)
+atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
 
-# Set up a simple atmosphere
-ws.surface_fieldPlanet(option="Earth")
-ws.surface_field[pa.arts.SurfaceKey("t")] = 295.0
-ws.atmospheric_fieldRead(
-    toa=100e3, basename="planets/Earth/afgl/tropical/", missing_is_zero=1
-)
 
-# Set up geometry of observation
-pos = [100e3, 0, 0]
-los = [180.0, 0.0]
-ws.ray_pathGeometric(pos=pos, los=los, max_step=1000.0)
-ws.spectral_radianceClearskyEmission()
+heights = typhon.physics.pressure2height(pressure_levels)
+print("height", heights)
+print(np.shape(heights))
 
-# %% Show results
+dz = np.diff(heights, prepend=heights[0])
+print("dz shape: ", np.shape(dz))
 
-fig, ax = plt.subplots()
-ax.plot(kayser_grid, ws.spectral_radiance[:, 0])
-ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
-ax.set_ylabel("Spectral radiance /")
-ax.set_title("Clear sky outgoing radiance")
-
-if "ARTS_HEADLESS" not in os.environ:
-    plt.show()
+print("dz", dz)
+h = np.cumsum(dz, axis=0)
+print("h", h)

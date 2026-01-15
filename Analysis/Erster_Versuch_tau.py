@@ -66,17 +66,18 @@ def absorption_coefficient(atmosphere):
 def calculate_tau(abs_coeff, pressure_profile):
 
     heights = typhon.physics.pressure2height(pressure_profile)
+    # Schichtdicke von 0 bis toa
     dz = np.diff(heights, prepend=heights[0])
 
     # wie in Vorlesung
-    tau = np.cumsum(abs_coeff * dz[:, None], axis=0)
+    tau = np.cumsum(abs_coeff[::-1, :] * dz[::-1, None], axis=0)
 
-    # Höhe, bei der τ = 1 erreicht wird
-    tau_height = np.zeros(abs_coeff.shape[1])
+    # Höhe, bei der τ = 1 erreicht wird für jede Frequenz
+    tau_height = np.zeros(abs_coeff.shape[1]) # np.zeros(len(FREQ_GRID))
 
     for i in range(abs_coeff.shape[1]):
         idx = np.argmax(tau[:, i] >= 1)
-        tau_height[i] = heights[idx]
+        tau_height[i] = heights[-idx]
 
     return tau, tau_height
 
