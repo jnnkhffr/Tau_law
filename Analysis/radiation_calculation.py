@@ -70,6 +70,36 @@ def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentra
     }
     return atm
 
+
+def absorption_coefficient(atmosphere):
+    h2o_absorption = pa.recipe.SingleSpeciesAbsorption(species="H2O")
+    co2_absorption = pa.recipe.SingleSpeciesAbsorption(species="CO2")
+
+    atm_point = pa.arts.AtmPoint()
+    atm_point["CO2"] = MIXING_RATIO_CO2
+
+    n_alt = atmosphere.sizes["alt"]
+
+    # Extract all values at once (avoid repeated .isel().item() calls)
+    temps = atmosphere["t"].values
+    pressures = atmosphere["p"].values
+    h2o_values = atmosphere["H2O"].values
+
+    # Pre-allocate lists with known size
+    absorption_coefficient_h2o = []
+    absorption_coefficient_co2 = []
+
+    for h in range(n_alt):
+        # Direct array indexing is much faster than .isel().item()
+        atm_point.temperature = temps[h]
+        atm_point.pressure = pressures[h]
+        atm_point["H2O"] = h2o_values[h]
+
+        absorption_coefficient_h2o.append(h2o_absorption(FREQ_GRID, atm_point))
+        absorption_coefficient_co2.append(co2_absorption(FREQ_GRID, atm_point))
+
+    return np.array(absorption_coefficient_h2o), np.array(absorption_coefficient_co2)
+
 def set_up_workspace(atmosphere):
 
     # Create a pyarts workspace
@@ -181,11 +211,13 @@ def main():
     atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
 
     # radiation calculations
-    working_space = set_up_workspace(atmosphere) #pyarts workspace with our atmosphere
-    spectral_radiance_toa = calculate_spectral_radiance(working_space)
+    #working_space = set_up_workspace(atmosphere) #pyarts workspace with our atmosphere
+    #spectral_radiance_toa = calculate_spectral_radiance(working_space)
 
-    total_flux = calculate_total_flux(spectral_radiance_toa)
-    absorption_coeff = calculate_absorption_coefficient(pressure_levels, working_space)
+    #total_flux = calculate_total_flux(spectral_radiance_toa)
+    #absorption_coeff = calculate_absorption_coefficient(pressure_levels, working_space)
+
+    absorption_coefficient(atmosphere)
 
     # plot results
     #plot_ola(spectral_radiance_toa, total_flux)
