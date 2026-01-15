@@ -162,22 +162,7 @@ def calculate_spectral_radiance(workspace):
 def calculate_total_flux(spectral_radiance):
     return np.trapezoid(spectral_radiance[:, 0], FREQ_GRID) * np.pi
 
-def calculate_absorption_coefficient(pressure_profile, workspace):
 
-    # this doesn't raise an error, but I have no idea what it does
-    absorption = pa.recipe.SingleSpeciesAbsorption(species="H2O")
-
-    heights = typhon.physics.pressure2height(pressure_profile)
-    absorption_coefficient = []
-
-    for h in heights:
-        atm_point = workspace.atmospheric_field(h, 0, 0)
-        print(f"atm_point: {atm_point}")
-        absorption_coefficient.append(absorption(FREQ_GRID, atm_point))
-        print(f"absorption coefficient: {absorption_coefficient}")
-
-    absorption_coefficient = np.array(absorption_coefficient)
-    return absorption_coefficient
 
 def plot_ola(spectral_radiance, flux):
     fig, ax = plt.subplots()
