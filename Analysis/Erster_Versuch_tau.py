@@ -127,7 +127,9 @@ def main():
     atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
 
     h2o, co2 = absorption_coefficient(atmosphere)
-    abs_coeff = h2o + co2
+    #abs_coeff = h2o + co2
+    #abs_coeff = co2
+    abs_coeff =h2o
 
     tau, tau_height = calculate_tau(abs_coeff, pressure_levels)
 
@@ -136,13 +138,15 @@ def main():
 
     # Plot tau = 1 height vs frequency
     plt.figure()
-    plt.plot(KAYSER_GRID, tau_height, "-.")
+    plt.plot(KAYSER_GRID, tau_height, "-")
     plt.xlabel("Wavenumber (cm$^{-1}$)")
-    plt.ylabel("Height where τ = 1 (m)")
-    plt.title("Emission height (τ = 1) vs. wavenumber")
+    plt.ylabel("Height where τ = 1 ")
+    plt.title("Emission height (τ = 1) vs. wavenumber for CO$_2$")
     plt.grid(True, color= 'grey', linewidth=0.3)
     #plt.savefig("C:/Users/janni/Desktop/Taulevel_CO2_H2O.pdf")
-    plt.savefig("Taulevel_CO2_H2O.pdf")
+    #plt.savefig("Taulevel_CO2_H2O.pdf")
+    plt.savefig("Taulevel_H2O.pdf")
+    #plt.savefig("Taulevel_CO2.pdf")
 
     plt.show()
 
