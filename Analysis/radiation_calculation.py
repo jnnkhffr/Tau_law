@@ -100,6 +100,21 @@ def absorption_coefficient(atmosphere):
 
     return np.array(absorption_coefficient_h2o), np.array(absorption_coefficient_co2)
 
+def calculate_tau(absorption_coefficient, pressure_profile):
+    heights = typhon.physics.pressure2height(pressure_profile)
+
+    tau = []
+    tau_height = 0
+    for h in range(heights):
+
+        tau_layer = absorption_coefficient[h, :0] * heights[h]
+        tau.append(tau_layer + tau[h-1])
+
+        if tau[h] >= 1:
+            tau_height = heights[h]
+            break
+
+    return np.array(tau), tau_height
 def set_up_workspace(atmosphere):
 
     # Create a pyarts workspace
