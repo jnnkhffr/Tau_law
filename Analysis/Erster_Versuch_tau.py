@@ -134,6 +134,18 @@ def main():
     print("Tau shape:", tau.shape)
     print("Height where tau=1 (per frequency):", tau_height)
 
+    # Plot tau = 1 height vs frequency
+    plt.figure()
+    plt.plot(KAYSER_GRID, tau_height, "-.")
+    plt.xlabel("Wavenumber (cm$^{-1}$)")
+    plt.ylabel("Height where τ = 1 (m)")
+    plt.title("Emission height (τ = 1) vs. wavenumber")
+    plt.grid(True, color= 'grey', linewidth=0.3)
+    #plt.savefig("C:/Users/janni/Desktop/Taulevel_CO2_H2O.pdf")
+    plt.savefig("Taulevel_CO2_H2O.pdf")
+
+    plt.show()
+
 
 if __name__ == "__main__":
     main()
