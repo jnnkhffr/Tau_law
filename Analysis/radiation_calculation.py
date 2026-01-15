@@ -78,7 +78,7 @@ def absorption_coefficient(atmosphere):
     atm_point = pa.arts.AtmPoint()
     atm_point["CO2"] = MIXING_RATIO_CO2
 
-    n_alt = atmosphere.sizes["alt"]
+    height_levels = atmosphere.sizes["alt"]
 
     # Extract all values at once (avoid repeated .isel().item() calls)
     temps = atmosphere["t"].values
@@ -89,7 +89,7 @@ def absorption_coefficient(atmosphere):
     absorption_coefficient_h2o = []
     absorption_coefficient_co2 = []
 
-    for h in range(n_alt):
+    for h in range(height_levels):
         # Direct array indexing is much faster than .isel().item()
         atm_point.temperature = temps[h]
         atm_point.pressure = pressures[h]
