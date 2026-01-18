@@ -118,7 +118,7 @@ def set_up_workspace(atmosphere):
 def spectral_radiance_at_tau_level(tau_heights, atmosphere):
     ws = pa.Workspace()
     ws.absorption_speciesSet(
-        species=["H2O-161, H2O-ForeignContCKDMT400, H2O-SelfContCKDMT400", "CO2-626"]
+        species=["H2O"]
     )
     ws.atmospheric_field = pa.data.to_atmospheric_field(atmosphere)
 
@@ -174,6 +174,18 @@ def plot_tau_level(tau_height):
 
     plt.show()
 
+def plot_tau_emission(tau_emission):
+
+    fig, ax = plt.subplots()
+    ax.plot(KAYSER_GRID, tau_emission)
+
+    ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
+    ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
+    ax.set_title(f"OLA at τ = 1 level")
+    plt.grid(True, color='grey', linewidth=0.3)
+    plt.savefig("Tau_Emission_H2O.pdf")
+    plt.show()
+
 
 def main():
 
@@ -197,6 +209,7 @@ def main():
     print("Height where tau=1 (per frequency):", tau_height)
     tau_emission = spectral_radiance_at_tau_level(tau_height, atmosphere)
     print("tau emission: ", tau_emission)
+    plot_tau_emission(tau_emission)
     # Plot tau = 1 height vs frequency
     #plot_tau_level(tau_height)
 
