@@ -30,8 +30,7 @@ def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentra
     :return: xarray dataset of our atmosphere profile
     '''
 
-    #
-    heights = typhon.physics.pressure2height(pressure_profile)
+    #heights = typhon.physics.pressure2height(pressure_profile)
 
     atm = xr.Dataset(
         {
@@ -100,7 +99,7 @@ def absorption_coefficient(atmosphere):
     return np.array(absorption_coefficient_h2o), np.array(absorption_coefficient_co2)
 
 def calculate_tau(absorption_coefficient, pressure_profile):
-    heights = typhon.physics.pressure2height(pressure_profile)
+    #heights = typhon.physics.pressure2height(pressure_profile)
 
     tau = []
     tau_height = 0
@@ -205,19 +204,21 @@ def main():
 
     # set up atmosphere
     t_profile, wmr_profile, pressure_levels = sca.create_vertical_profile(T_SURF)
+    global heights
+    heights = typhon.physics.pressure2height(pressure_levels)
     atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
 
     # radiation calculations
-    #working_space = set_up_workspace(atmosphere) #pyarts workspace with our atmosphere
-    #spectral_radiance_toa = calculate_spectral_radiance(working_space)
-
-    #total_flux = calculate_total_flux(spectral_radiance_toa)
+    working_space = set_up_workspace(atmosphere) #pyarts workspace with our atmosphere
+    spectral_radiance_toa = calculate_spectral_radiance(working_space)
+    #print(working_space.spectral_radiance[0, 0])
+    total_flux = calculate_total_flux(spectral_radiance_toa)
     #absorption_coeff = calculate_absorption_coefficient(pressure_levels, working_space)
 
-    absorption_coefficient(atmosphere)
+    #absorption_coefficient(atmosphere)
 
     # plot results
-    #plot_ola(spectral_radiance_toa, total_flux)
+    plot_ola(spectral_radiance_toa, total_flux)
 
 if __name__ == "__main__":
     main()

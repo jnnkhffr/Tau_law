@@ -23,8 +23,6 @@ FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
 
 def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentration):
 
-    heights = typhon.physics.pressure2height(pressure_profile)
-
     atm = xr.Dataset(
         {
             "t": ("alt", temp_profile),
@@ -67,20 +65,20 @@ def absorption_coefficient(atmosphere):
     return absorption_h2o, absorption_co2
 
 
-def calculate_tau(abs_coeff, pressure_profile):
+def calculate_tau(abs_coeff):
 
-    heights = typhon.physics.pressure2height(pressure_profile)
-    # Schichtdicke von 0 bis toa
+    # thickness of layer, ordered from surface to TOA
     dz = np.diff(heights, prepend=heights[0])
 
-    # wie in Vorlesung
+    # Calculating tau from TOA towards ground
     tau = np.cumsum(abs_coeff[::-1, :] * dz[::-1, None], axis=0)
 
-    # Höhe, bei der τ = 1 erreicht wird für jede Frequenz
+    # height when τ = 1 is reached, for every frequency
     tau_height = np.zeros(abs_coeff.shape[1]) # np.zeros(len(FREQ_GRID))
 
     for i in range(abs_coeff.shape[1]): # range(len(FREQ_GRID))
-        idx = np.argmax(tau[:, i] >= 1)
+
+        idx = np.argmax(tau[:, i] >= 1) # index of height for τ = 1
         tau_height[i] = heights[-idx]
 
     return tau, tau_height
@@ -90,7 +88,7 @@ def set_up_workspace(atmosphere):
 
     ws = pa.Workspace()
     ws.absorption_speciesSet(
-        species=["H2O", "H2O-ForeignContCKDMT400", "H2O-SelfContCKDMT400", "CO2", "O3"]
+        species=["H2O", "CO2"]
     )
     ws.atmospheric_field = pa.data.to_atmospheric_field(atmosphere)
 
@@ -117,8 +115,15 @@ def set_up_workspace(atmosphere):
     return ws
 
 
-def calculate_spectral_radiance(workspace):
-    return workspace.spectral_radiance
+def calculate_spectral_radiance(workspace, height):
+
+    radiance_idx = np.empty(FREQ_GRID.shape, )
+
+    for f in range(len(FREQ_GRID)):
+
+        radiance_idx[0] = f
+        radiance_idx[1] = f
+    return workspace.spectral_radiance[radiance_idx[0], radiance_idx[1]]
 
 
 def calculate_total_flux(spectral_radiance):
@@ -144,6 +149,9 @@ def main():
 
     # set up atmosphere
     t_profile, wmr_profile, pressure_levels = sca.create_vertical_profile(T_SURF)
+    global heights
+    heights = typhon.physics.pressure2height(pressure_levels)
+
     atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
 
     # calculate absorption coefficient
