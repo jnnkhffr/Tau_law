@@ -140,7 +140,7 @@ def main():
     plt.figure()
     plt.plot(KAYSER_GRID, tau_height / 1000, "-") # y axis in km
     plt.xlabel("Wavenumber (cm$^{-1}$)")
-    plt.ylabel("Height where τ = 1 ")
+    plt.ylabel("Height (km)")
     plt.title("Emission height (τ = 1) vs. wavenumber for CO$_2$")
     plt.grid(True, color= 'grey', linewidth=0.3)
     #plt.savefig("C:/Users/janni/Desktop/Taulevel_CO2_H2O.pdf")
