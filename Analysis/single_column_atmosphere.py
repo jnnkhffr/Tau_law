@@ -6,7 +6,7 @@ import typhon
 t_0 = 290                                  # K
 COLD_POINT_TEMPERATURE_TROPOPAUSE = 200    # K
 RELATIVE_HUMIDITY = 0.8                    # between 0 and 1
-NUMBER_OF_PRESSURE_LEVELS = 100
+NUMBER_OF_PRESSURE_LEVELS = 10
 PRESSURE_LEVELS = np.logspace(3, 0, NUMBER_OF_PRESSURE_LEVELS)  * 10 ** 2 # in Pa
 
 def create_vertical_profile(surface_temperature: float):

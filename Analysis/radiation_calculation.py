@@ -70,7 +70,6 @@ def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentra
     }
     return atm
 
-
 def absorption_coefficient(atmosphere):
     h2o_absorption = pa.recipe.SingleSpeciesAbsorption(species="H2O")
     co2_absorption = pa.recipe.SingleSpeciesAbsorption(species="CO2")
@@ -115,6 +114,7 @@ def calculate_tau(absorption_coefficient, pressure_profile):
             break
 
     return np.array(tau), tau_height
+
 def set_up_workspace(atmosphere):
 
     # Create a pyarts workspace
@@ -177,8 +177,6 @@ def calculate_spectral_radiance(workspace):
 def calculate_total_flux(spectral_radiance):
     return np.trapezoid(spectral_radiance[:, 0], FREQ_GRID) * np.pi
 
-
-
 def plot_ola(spectral_radiance, flux):
     fig, ax = plt.subplots()
     ax.plot(KAYSER_GRID, spectral_radiance[:, 0])
@@ -202,7 +200,6 @@ def plot_ola(spectral_radiance, flux):
 
     if "ARTS_HEADLESS" not in os.environ:
         plt.show()
-
 
 def main():
 

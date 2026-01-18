@@ -13,7 +13,7 @@ MIXING_RATIO_CO2 = 400e-6
 MIXING_RATIO_O3 = 1e-6
 T_SURF = 290  # K
 
-KAYSER_GRID = np.linspace(1, 2000, 200)
+KAYSER_GRID = np.linspace(1, 2000, 10)
 FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
 
 
@@ -75,7 +75,7 @@ def calculate_tau(abs_coeff, pressure_profile):
     # Höhe, bei der τ = 1 erreicht wird für jede Frequenz
     tau_height = np.zeros(abs_coeff.shape[1]) # np.zeros(len(FREQ_GRID))
 
-    for i in range(abs_coeff.shape[1]):
+    for i in range(abs_coeff.shape[1]): # range(len(FREQ_GRID))
         idx = np.argmax(tau[:, i] >= 1)
         tau_height[i] = heights[-idx]
 
@@ -123,14 +123,17 @@ def calculate_total_flux(spectral_radiance):
 
 def main():
 
+    # set up atmosphere
     t_profile, wmr_profile, pressure_levels = sca.create_vertical_profile(T_SURF)
     atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
 
+    # calculate absorption coefficient
     h2o, co2 = absorption_coefficient(atmosphere)
     #abs_coeff = h2o + co2
     #abs_coeff = co2
-    abs_coeff =h2o
+    abs_coeff = h2o
 
+    # calculate τ = 1 height and τ
     tau, tau_height = calculate_tau(abs_coeff, pressure_levels)
 
     print("Tau shape:", tau.shape)
