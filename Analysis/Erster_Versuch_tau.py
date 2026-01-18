@@ -116,23 +116,43 @@ def set_up_workspace(atmosphere):
 
 
 def spectral_radiance_at_tau_level(tau_heights, atmosphere):
-
-    fop = pa.recipe.SpectralAtmosphericFlux(
-        species = ["H2O"],
-        remove_lines_percentile = {"H2O": 70}
+    ws = pa.Workspace()
+    ws.absorption_speciesSet(
+        species=["H2O-161, H2O-ForeignContCKDMT400, H2O-SelfContCKDMT400", "CO2-626"]
     )
+    ws.atmospheric_field = pa.data.to_atmospheric_field(atmosphere)
 
-    # atmosphere doesn't work
-    flux, alts = fop(FREQ_GRID, atmosphere)
+    ws.surface_fieldPlanet(option='Earth')
+    ws.surface_field["t"] = atmosphere["t"].sel(alt=0).values
 
-    # Vectorized height mapping
-    height_idx = np.argmin(np.abs(heights[:, np.newaxis] - tau_heights), axis=0)
+    ws.ReadCatalogData()
 
-    # Vectorized indexing instead of loop
-    freq_idx = np.arange(len(FREQ_GRID))
+    cutoff = pa.arts.convert.kaycm2freq(25)
+    for band in ws.absorption_bands:
+        ws.absorption_bands[band].cutoff = "ByLine"
+        ws.absorption_bands[band].cutoff_value = cutoff
 
-    # radiance for each height and frequency
-    tau_radiance = flux.up.T[height_idx, freq_idx]
+    ws.absorption_bands.keep_hitran_s(approximate_percentile=90)
+    ws.propagation_matrix_agendaAuto()
+
+    # Initialize output array: one radiance value per frequency
+    tau_radiance = np.zeros(len(FREQ_GRID))
+
+    # For each frequency, calculate radiance at its corresponding tau=1 height
+    for i, height in enumerate(tau_heights):
+        # Set observation position at the tau=1 height for this frequency
+        pos = [height, 0, 0]
+        los = [180.0, 0.0]  # looking upward
+
+        # Set frequency grid to just this single frequency
+        ws.frequency_grid = np.array([FREQ_GRID[i]])
+
+        # Calculate ray path and radiance
+        ws.ray_pathGeometric(pos=pos, los=los, max_step=1000.0)
+        ws.spectral_radianceClearskyEmission()
+
+        # Extract the radiance value (first frequency, first Stokes component)
+        tau_radiance[i] = ws.spectral_radiance[0, 0]
 
     return tau_radiance
 
