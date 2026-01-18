@@ -1,8 +1,12 @@
 import os
+from typing import Any
+
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 import pyarts3 as pa
+from numpy import dtype, float64, ndarray
+
 import single_column_atmosphere as sca
 import typhon
 
@@ -121,6 +125,21 @@ def calculate_total_flux(spectral_radiance):
     return np.trapezoid(spectral_radiance[:, 0], FREQ_GRID) * np.pi
 
 
+def plot_tau_level(tau_height):
+    plt.figure()
+    plt.plot(KAYSER_GRID, tau_height / 1000, "-")  # y axis in km
+    plt.xlabel("Wavenumber (cm$^{-1}$)")
+    plt.ylabel("Height (km)")
+    plt.title("Emission height (τ = 1) vs. wavenumber for CO$_2$")
+    plt.grid(True, color='grey', linewidth=0.3)
+    # plt.savefig("C:/Users/janni/Desktop/Taulevel_CO2_H2O.pdf")
+    # plt.savefig("Taulevel_CO2_H2O.pdf")
+    plt.savefig("Taulevel_H2O.pdf")
+    # plt.savefig("Taulevel_CO2.pdf")
+
+    plt.show()
+
+
 def main():
 
     # set up atmosphere
@@ -140,18 +159,9 @@ def main():
     print("Height where tau=1 (per frequency):", tau_height)
 
     # Plot tau = 1 height vs frequency
-    plt.figure()
-    plt.plot(KAYSER_GRID, tau_height / 1000, "-") # y axis in km
-    plt.xlabel("Wavenumber (cm$^{-1}$)")
-    plt.ylabel("Height (km)")
-    plt.title("Emission height (τ = 1) vs. wavenumber for CO$_2$")
-    plt.grid(True, color= 'grey', linewidth=0.3)
-    #plt.savefig("C:/Users/janni/Desktop/Taulevel_CO2_H2O.pdf")
-    #plt.savefig("Taulevel_CO2_H2O.pdf")
-    plt.savefig("Taulevel_H2O.pdf")
-    #plt.savefig("Taulevel_CO2.pdf")
+    plot_tau_level(tau_height)
 
-    plt.show()
+
 
 
 if __name__ == "__main__":
