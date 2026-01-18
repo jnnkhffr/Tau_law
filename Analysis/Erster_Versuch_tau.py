@@ -17,7 +17,7 @@ MIXING_RATIO_CO2 = 400e-6
 MIXING_RATIO_O3 = 1e-6
 T_SURF = 290  # K
 
-KAYSER_GRID = np.linspace(1, 2000, 10)
+KAYSER_GRID = np.linspace(1, 2000, 200)
 FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
 
 
@@ -115,16 +115,26 @@ def set_up_workspace(atmosphere):
     return ws
 
 
-def calculate_spectral_radiance(workspace, height):
+def spectral_radiance_at_tau_level(tau_heights, atmosphere):
 
-    radiance_idx = np.empty(FREQ_GRID.shape, )
+    fop = pa.recipe.SpectralAtmosphericFlux(
+        species = ["H2O"],
+        remove_lines_percentile = {"H2O": 70}
+    )
 
-    for f in range(len(FREQ_GRID)):
+    # atmosphere doesn't work
+    flux, alts = fop(FREQ_GRID, atmosphere)
 
-        radiance_idx[0] = f
-        radiance_idx[1] = f
-    return workspace.spectral_radiance[radiance_idx[0], radiance_idx[1]]
+    # Vectorized height mapping
+    height_idx = np.argmin(np.abs(heights[:, np.newaxis] - tau_heights), axis=0)
 
+    # Vectorized indexing instead of loop
+    freq_idx = np.arange(len(FREQ_GRID))
+
+    # radiance for each height and frequency
+    tau_radiance = flux.up.T[height_idx, freq_idx]
+
+    return tau_radiance
 
 def calculate_total_flux(spectral_radiance):
     return np.trapezoid(spectral_radiance[:, 0], FREQ_GRID) * np.pi
@@ -161,15 +171,14 @@ def main():
     abs_coeff = h2o
 
     # calculate τ = 1 height and τ
-    tau, tau_height = calculate_tau(abs_coeff, pressure_levels)
+    tau, tau_height = calculate_tau(abs_coeff)
 
     print("Tau shape:", tau.shape)
     print("Height where tau=1 (per frequency):", tau_height)
-
+    tau_emission = spectral_radiance_at_tau_level(tau_height, atmosphere)
+    print("tau emission: ", tau_emission)
     # Plot tau = 1 height vs frequency
-    plot_tau_level(tau_height)
-
-
+    #plot_tau_level(tau_height)
 
 
 if __name__ == "__main__":

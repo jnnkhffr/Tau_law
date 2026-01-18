@@ -178,7 +178,7 @@ def calculate_total_flux(spectral_radiance):
 
 def plot_ola(spectral_radiance, flux):
     fig, ax = plt.subplots()
-    ax.plot(KAYSER_GRID, spectral_radiance[:, 0])
+    ax.plot(KAYSER_GRID, spectral_radiance[:, 25])
 
     # for t in temperatures:
     #    ax.plot(kayser_grid, typhon.physics.planck(freq_grid, t), label=f"T={t} K")
@@ -210,15 +210,15 @@ def main():
 
     # radiation calculations
     working_space = set_up_workspace(atmosphere) #pyarts workspace with our atmosphere
-    spectral_radiance_toa = calculate_spectral_radiance(working_space)
-    #print(working_space.spectral_radiance[0, 0])
-    total_flux = calculate_total_flux(spectral_radiance_toa)
+    print(calculate_spectral_radiance(working_space).shape)
+    #spectral_radiance_toa = calculate_spectral_radiance(working_space)
+    #total_flux = calculate_total_flux(spectral_radiance_toa)
     #absorption_coeff = calculate_absorption_coefficient(pressure_levels, working_space)
 
     #absorption_coefficient(atmosphere)
 
     # plot results
-    plot_ola(spectral_radiance_toa, total_flux)
+    #plot_ola(spectral_radiance_toa, total_flux)
 
 if __name__ == "__main__":
     main()

@@ -44,12 +44,38 @@ atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_R
 
 
 heights = typhon.physics.pressure2height(pressure_levels)
-print("height", heights)
-print(np.shape(heights))
 
-dz = np.diff(heights, prepend=heights[0])
-print("dz shape: ", np.shape(dz))
+fop = pa.recipe.SpectralAtmosphericFlux(
+    species=["H2O"],
+    remove_lines_percentile={"H2O": 70}
+)
 
-print("dz", dz)
-h = np.cumsum(dz, axis=0)
-print("h", h)
+# First, let's see what the original atmosphere looks like
+original_atm = fop.get_atmosphere()
+print("Original atmosphere keys:", original_atm.keys())
+print("Original atmosphere length:", len(original_atm['t']))
+
+# Now create your atmosphere with ALL the required fields matching that length
+n_levels = len(atmosphere['t'].values)
+
+atm = {
+    't': atmosphere['t'].values.tolist(),
+    'H2O': atmosphere['H2O'].values.tolist(),
+    'p': atmosphere['p'].values.tolist(),
+    'wind_u': [0] * n_levels,
+    'wind_v': [0] * n_levels,
+    'wind_w': [0] * n_levels,
+    'mag_u': [0] * n_levels,
+    'mag_v': [0] * n_levels,
+    'mag_w': [0] * n_levels,
+}
+
+# Add any other fields that were in original_atm
+for key in original_atm.keys():
+    if key not in atm:
+        atm[key] = [0] * n_levels
+
+print("New atm keys:", atm.keys())
+print("New atm length:", len(atm['t']))
+
+flux, alt = fop(FREQ_GRID, atm)
