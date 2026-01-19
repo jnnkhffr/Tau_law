@@ -118,7 +118,7 @@ def set_up_workspace(atmosphere):
 def spectral_radiance_at_tau_level(tau_heights, atmosphere):
     ws = pa.Workspace()
     ws.absorption_speciesSet(
-        species=["H2O"]
+        species=["H2O", "CO2"]
     )
     ws.atmospheric_field = pa.data.to_atmospheric_field(atmosphere)
 
@@ -181,9 +181,9 @@ def plot_tau_emission(tau_emission):
 
     ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
     ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
-    ax.set_title(f"OLA at τ = 1 level")
+    ax.set_title(f"OLA at τ = 1 level for H20 and CO2")
     plt.grid(True, color='grey', linewidth=0.3)
-    plt.savefig("Tau_Emission_H2O.pdf")
+    plt.savefig("Tau_Emission_H2O_CO2.pdf")
     plt.show()
 
 
@@ -198,9 +198,9 @@ def main():
 
     # calculate absorption coefficient
     h2o, co2 = absorption_coefficient(atmosphere)
-    #abs_coeff = h2o + co2
+    abs_coeff = h2o + co2
     #abs_coeff = co2
-    abs_coeff = h2o
+    #abs_coeff = h2o
 
     # calculate τ = 1 height and τ
     tau, tau_height = calculate_tau(abs_coeff)
