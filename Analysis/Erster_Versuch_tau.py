@@ -117,7 +117,6 @@ def set_up_workspace(atmosphere, species_list):
 
     return ws
 
-
 def spectral_radiance_at_tau_level(tau_heights, atmosphere, species_list):
     ws = pa.Workspace()
     ws.absorption_speciesSet(
@@ -159,6 +158,36 @@ def spectral_radiance_at_tau_level(tau_heights, atmosphere, species_list):
         tau_radiance[i] = ws.spectral_radiance[0, 0]
 
     return tau_radiance
+
+def emission_by_temp(temperature):
+    planck_rad = typhon.physics.planck(FREQ_GRID, temperature)
+    return planck_rad
+
+def get_temperature_at_tau_heights(tau_heights, atmosphere):
+    """
+    Interpolate atmospheric temperature at tau=1 heights using numpy.
+
+    Parameters:
+    -----------
+    tau_heights : array-like
+        Heights where tau=1 is reached for each frequency (in meters)
+    atmosphere : xr.Dataset
+        Atmospheric dataset containing 't' (temperature) and 'alt' (altitude) coords
+
+    Returns:
+    --------
+    tau_temperatures : np.ndarray
+        Temperatures at each tau=1 height (in Kelvin)
+    """
+    # Get atmosphere height and temperature profiles
+    atm_heights = atmosphere.coords['alt'].values
+    atm_temps = atmosphere['t'].values
+
+    # Use numpy's interp function for linear interpolation
+    # np.interp automatically handles extrapolation by using edge values
+    tau_temperatures = np.interp(tau_heights, atm_heights, atm_temps)
+
+    return tau_temperatures
 
 def calculate_total_flux(spectral_radiance):
     return np.trapezoid(spectral_radiance[:, 0], FREQ_GRID) * np.pi
@@ -222,7 +251,9 @@ def main():
 
         # calculate τ = 1 height and τ
         tau, tau_height = calculate_tau(abs_total)
-
+        
+        t_emission = get_temperature_at_tau_heights(tau, atmosphere)
+        planck_rad = emission_by_temp(t_emission)
         print("Tau shape:", tau.shape)
         print("Height where tau=1 (per frequency):", tau_height)
 
