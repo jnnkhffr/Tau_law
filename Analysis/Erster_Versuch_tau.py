@@ -21,7 +21,7 @@ SPECIES_CASES = [
     ["H2O", "CO2", "O3"]
 ]
 
-KAYSER_GRID = np.linspace(1, 2000, 200)
+KAYSER_GRID = np.linspace(1, 2000, 1000)
 FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
 
 
@@ -183,7 +183,7 @@ def plot_tau_emission(tau_emission, filename, title_suffix=""):
 
     ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
     ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
-    ax.set_title(f"OLA at τ = 1 level for {title_suffix}")
+    ax.set_title(f"OLR at τ = 1 level for {title_suffix}")
     plt.grid(True, color='grey', linewidth=0.3)
     plt.savefig(filename)
     plt.show()
