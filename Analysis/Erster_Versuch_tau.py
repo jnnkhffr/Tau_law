@@ -39,12 +39,15 @@ def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentra
 
 def absorption_coefficient(atmosphere):
 
+    # ARTS recipe for calculating absorption coefficient
     h2o_absorption = pa.recipe.SingleSpeciesAbsorption(species="H2O")
     co2_absorption = pa.recipe.SingleSpeciesAbsorption(species="CO2")
 
+    # defining atmospheric point
     atm_point = pa.arts.AtmPoint()
-    atm_point["CO2"] = MIXING_RATIO_CO2
+    atm_point["CO2"] = MIXING_RATIO_CO2 # CO2 concentration is constant
 
+    # profile for temp, p and H20
     temps = atmosphere["t"].values
     pressures = atmosphere["p"].values
     h2o_values = atmosphere["H2O"].values
