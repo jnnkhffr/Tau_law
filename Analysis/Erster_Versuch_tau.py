@@ -200,9 +200,11 @@ def main():
 
     # set up atmosphere
     t_profile, wmr_profile, pressure_levels = sca.create_vertical_profile(T_SURF)
+    # set height levels to be used in claculation
     global heights
     heights = typhon.physics.pressure2height(pressure_levels)
 
+    # atmosphere in ARTS
     atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
 
     # calculate absorption coefficient
