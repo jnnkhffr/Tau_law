@@ -54,9 +54,11 @@ def absorption_coefficient(atmosphere):
 
     n_levels = len(temps)
 
+    # storing absorption coefficient for each level and frequency
     absorption_h2o = np.zeros((n_levels, len(FREQ_GRID)))
     absorption_co2 = np.zeros((n_levels, len(FREQ_GRID)))
 
+    # iterating through every level and caluclating  absorption coefficient
     for h in range(n_levels):
         atm_point.temperature = temps[h]
         atm_point.pressure = pressures[h]
