@@ -348,7 +348,8 @@ def main():
             filename=f"Planck_Emission_{species_tag}",
             title_suffix=f"({species_tag})",
         )
-        #Scatter
+
+        #Scatter-Plots
         plot_tau_emission_scatter(
             tau_emission,
             filename=f"Tau_Emission_{species_tag}",
