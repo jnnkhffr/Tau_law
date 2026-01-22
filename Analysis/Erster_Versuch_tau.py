@@ -21,7 +21,7 @@ SPECIES_CASES = [
     ["CO2"],
     ["O3"],
     ["H2O", "CO2"],
-    ["H20", "CO2", "O3"]
+    ["H2O", "CO2", "O3"]
 ]
 
 KAYSER_GRID = np.linspace(1, 2000, 200)
