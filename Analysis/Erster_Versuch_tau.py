@@ -1,11 +1,8 @@
-import os
-from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 import pyarts3 as pa
-from numpy import dtype, float64, ndarray
 
 import single_column_atmosphere as sca
 import typhon
