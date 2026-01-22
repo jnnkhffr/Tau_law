@@ -128,6 +128,33 @@ def spectral_radiance_at_tau_level(tau_heights, atmosphere, species_list):
 
     return tau_radiance
 
+def spectral_radiance_at_toa(atmosphere, species_list):
+    ws = pa.Workspace()
+    ws.absorption_speciesSet(
+        species=species_list
+    )
+    ws.atmospheric_field = pa.data.to_atmospheric_field(atmosphere)
+
+    ws.surface_fieldPlanet(option='Earth')
+    ws.surface_field["t"] = atmosphere["t"].sel(alt=0).values
+
+    ws.ReadCatalogData()
+
+    cutoff = pa.arts.convert.kaycm2freq(25)
+    for band in ws.absorption_bands:
+        ws.absorption_bands[band].cutoff = "ByLine"
+        ws.absorption_bands[band].cutoff_value = cutoff
+
+    ws.absorption_bands.keep_hitran_s(approximate_percentile=90)
+    ws.propagation_matrix_agendaAuto()
+
+    # Set up geometry of observation
+    pos = [100e3, 0, 0]
+    los = [180.0, 0.0]
+    ws.ray_pathGeometric(pos=pos, los=los, max_step=1000.0)
+    ws.spectral_radianceClearskyEmission()
+    return ws.spectral_radiance[:, 0]
+
 def emission_by_temp(temperature):
     planck_rad = typhon.physics.planck(FREQ_GRID, temperature)
     return planck_rad
@@ -170,7 +197,7 @@ def plot_tau_level(tau_height, filename, title_suffix=""):
     plt.title(f"Emission height at τ = 1 for {title_suffix}")
     plt.grid(True, color='grey', linewidth=0.3)
     plt.savefig(f"{filename}.pdf")
-    plt.savefig(f"{filename}.svg")
+    plt.savefig(f"{filename}.svg", bbox_inches="tight")
     plt.show()
     plt.close()
 
@@ -184,7 +211,7 @@ def plot_tau_emission(tau_emission, filename, title_suffix=""):
     ax.set_title(f"OLR at τ = 1 level for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
     plt.savefig(f"{filename}.pdf")
-    plt.savefig(f"{filename}.svg")
+    plt.savefig(f"{filename}.svg", bbox_inches="tight")
     plt.show()
     plt.close()
 
@@ -196,7 +223,7 @@ def plot_planck_emission(planck_emission, filename, title_suffix=""):
     ax.set_title(f"Planck emission at τ = 1 level for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
     plt.savefig(f"{filename}.pdf")
-    plt.savefig(f"{filename}.svg")
+    plt.savefig(f"{filename}.svg", bbox_inches="tight")
     plt.show()
     plt.close()
 
@@ -211,7 +238,7 @@ def plot_tau_level_scatter(tau_height, filename, title_suffix=""):
     plt.grid(True, color='grey', linewidth=0.3)
 
     plt.savefig(f"{filename}_scatter.pdf")
-    plt.savefig(f"{filename}_scatter.svg")
+    plt.savefig(f"{filename}_scatter.svg", bbox_inches="tight")
     plt.close()
 
 def plot_tau_emission_scatter(tau_emission, filename, title_suffix=""):
@@ -224,7 +251,7 @@ def plot_tau_emission_scatter(tau_emission, filename, title_suffix=""):
     ax.grid(True, color='grey', linewidth=0.3)
 
     plt.savefig(f"{filename}_scatter.pdf")
-    plt.savefig(f"{filename}_scatter.svg")
+    plt.savefig(f"{filename}_scatter.svg", bbox_inches="tight")
     plt.close()
 
 def plot_planck_emission_scatter(planck_emission, filename, title_suffix=""):
@@ -237,10 +264,20 @@ def plot_planck_emission_scatter(planck_emission, filename, title_suffix=""):
     ax.grid(True, color='grey', linewidth=0.3)
 
     plt.savefig(f"{filename}_scatter.pdf")
-    plt.savefig(f"{filename}_scatter.svg")
+    plt.savefig(f"{filename}_scatter.svg", bbox_inches="tight")
     plt.close()
 
+def plot_OLR_at_TOA(radiance, filename, title_suffix=""):
+    fig, ax = plt.subplots()
+    ax.plot(KAYSER_GRID, radiance, linewidth=0.7)
+    ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
+    ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
+    ax.set_title(f"OLR at TOA for {title_suffix}")
+    ax.grid(True, color='grey', linewidth=0.3)
 
+    plt.savefig(f"{filename}_OLR_TOA.pdf")
+    plt.savefig(f"{filename}_OLR_TOA.svg", bbox_inches="tight")
+    plt.show(block=False)
 
 def main():
 
@@ -288,6 +325,10 @@ def main():
         )
         print("tau emission: ", tau_emission)
 
+        # OLR at TOA
+        olr_toa = spectral_radiance_at_toa(atmosphere, species_list)
+
+
         # Plots
         plot_tau_emission(
             tau_emission,
@@ -319,6 +360,11 @@ def main():
             planck_rad,
             filename=f"Planck_Emission_{species_tag}",
             title_suffix=f"({species_tag})",
+        )
+        plot_OLR_at_TOA(
+            olr_toa,
+            filename=f"OLR_TOA_{species_tag}",
+            title_suffix=f"({species_tag})"
         )
 
 if __name__ == "__main__":

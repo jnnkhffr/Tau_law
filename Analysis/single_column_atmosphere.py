@@ -90,7 +90,7 @@ def plot_profiles(t_profile, water_vapor_volume_mixing_ratio):
     # ---- Water Vapor Mixing Ratio ----
     ax = axes[2]
     ax.plot(water_vapor_volume_mixing_ratio, pressures_hpa)
-    ax.set_xlabel('Mixing Ratio (Pa/Pa)')
+    ax.set_xlabel('Mixing Ratio')
     ax.set_ylabel('Pressure (hPa)')
     ax.set_title("Water Vapor VMR")
     ax.invert_yaxis()
@@ -98,6 +98,7 @@ def plot_profiles(t_profile, water_vapor_volume_mixing_ratio):
 
     plt.tight_layout()
     plt.savefig("vertical_profiles.pdf")
+    plt.savefig("vertical_profiles.svg", bbox_inches="tight")
     plt.show()
 
 def main():
