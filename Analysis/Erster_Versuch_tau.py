@@ -1,4 +1,4 @@
-
+import time
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -148,6 +148,8 @@ def spectral_radiance_at_toa(atmosphere, species_list):
     ws.absorption_bands.keep_hitran_s(approximate_percentile=90)
     ws.propagation_matrix_agendaAuto()
 
+    ws.frequency_grid = FREQ_GRID
+
     # Set up geometry of observation
     pos = [100e3, 0, 0]
     los = [180.0, 0.0]
@@ -198,7 +200,7 @@ def plot_tau_level(tau_height, filename, title_suffix=""):
     plt.grid(True, color='grey', linewidth=0.3)
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg", bbox_inches="tight")
-    plt.show()
+    #plt.show()
     plt.close()
 
 def plot_tau_emission(tau_emission, filename, title_suffix=""):
@@ -212,7 +214,7 @@ def plot_tau_emission(tau_emission, filename, title_suffix=""):
     ax.grid(True, color='grey', linewidth=0.3)
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg", bbox_inches="tight")
-    plt.show()
+    #plt.show()
     plt.close()
 
 def plot_planck_emission(planck_emission, filename, title_suffix=""):
@@ -224,7 +226,7 @@ def plot_planck_emission(planck_emission, filename, title_suffix=""):
     ax.grid(True, color='grey', linewidth=0.3)
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg", bbox_inches="tight")
-    plt.show()
+    #plt.show()
     plt.close()
 
 
@@ -296,6 +298,7 @@ def plot_OLR_diff(olr_diff, filename, title_suffix=""):
 
 
 def main():
+    start_time = time.time()  # Startzeit des Codes (Just for Fun)
 
     # set up atmosphere
     t_profile, wmr_profile, pressure_levels = sca.create_vertical_profile(T_SURF)
@@ -394,5 +397,18 @@ def main():
             filename=f"OLR_diff_to_emission_level_for_{species_tag}",
             title_suffix=f"({species_tag})"
         )
+        # Berechnung wie lange der Code gelaufen ist'
+        end_time = time.time()  # Endzeit
+        runtime = end_time - start_time
+        print(f"\nGesamtlaufzeit: {runtime:.2f} Sekunden")
+
+    total_end = time.time()
+    runtime = total_end - start_time
+    minutes = int(runtime // 60)
+    seconds = runtime % 60
+    print(f"Gesamtlaufzeit: {minutes} min {seconds:.1f} s")
+
+    #print(f"\nGesamtlaufzeit des Skripts: {total_end - start_time:.2f} s")
+
 if __name__ == "__main__":
     main()
