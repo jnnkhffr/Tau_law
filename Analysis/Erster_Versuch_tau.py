@@ -263,7 +263,7 @@ def main():
         tau, tau_height = calculate_tau(abs_total)
 
         # emission temperature
-        t_emission = get_temperature_at_tau_heights(tau, atmosphere)
+        t_emission = get_temperature_at_tau_heights(tau_height, atmosphere)
 
         # planck radiation with emission temperature
         planck_rad = emission_by_temp(t_emission)
