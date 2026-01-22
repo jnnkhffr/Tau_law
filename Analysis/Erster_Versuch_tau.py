@@ -21,7 +21,7 @@ SPECIES_CASES = [
     ["CO2"],
     ["O3"],
     ["H2O", "CO2"],
-    ["H20", "CO2", "H2="]
+    ["H20", "CO2", "O3"]
 ]
 
 KAYSER_GRID = np.linspace(1, 2000, 200)
@@ -210,8 +210,10 @@ def main():
     SPECIES_CASES = [
         ["H2O"],
         ["CO2"],
+        ["O3"],
         ["H2O", "CO2"],
-    ]
+        ["H20", "CO2", "O3"]
+]
 
     for species_list in SPECIES_CASES:
         species_tag = "_".join(species_list)
