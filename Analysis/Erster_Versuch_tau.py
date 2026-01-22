@@ -328,6 +328,9 @@ def main():
         # OLR at TOA
         olr_toa = spectral_radiance_at_toa(atmosphere, species_list)
 
+        # OLR difference at OLR TOA - OLR at tau = 1
+        olr_diff_arts = olr_toa - tau_emission
+        olr_diff_planck = olr_toa - planck_rad
 
         # Plots
         plot_tau_emission(
