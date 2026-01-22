@@ -58,7 +58,7 @@ def absorption_coefficient(atmosphere):
     absorption_h2o = np.zeros((n_levels, len(FREQ_GRID)))
     absorption_co2 = np.zeros((n_levels, len(FREQ_GRID)))
 
-    # iterating through every level and caluclating  absorption coefficient
+    # iterating through every level and calculating  absorption coefficient
     for h in range(n_levels):
         atm_point.temperature = temps[h]
         atm_point.pressure = pressures[h]
@@ -78,11 +78,12 @@ def calculate_tau(abs_coeff):
     # Calculating tau from TOA towards ground
     tau = np.cumsum(abs_coeff[::-1, :] * dz[::-1, None], axis=0)
 
-    # height when τ = 1 is reached, for every frequency
+    # height where τ = 1 is reached, for every frequency
     tau_height = np.zeros(abs_coeff.shape[1]) # np.zeros(len(FREQ_GRID))
 
     for i in range(abs_coeff.shape[1]): # range(len(FREQ_GRID))
 
+        # finding height index for where τ = 1 is reached
         idx = np.argmax(tau[:, i] >= 1) # index of height for τ = 1
         tau_height[i] = heights[-idx]
 
@@ -121,6 +122,8 @@ def set_up_workspace(atmosphere):
 
 
 def spectral_radiance_at_tau_level(tau_heights, atmosphere):
+    """Calculating the radiation at the τ = 1 level"""
+
     ws = pa.Workspace()
     ws.absorption_speciesSet(
         species=["H2O", "CO2"]
@@ -145,6 +148,7 @@ def spectral_radiance_at_tau_level(tau_heights, atmosphere):
 
     # For each frequency, calculate radiance at its corresponding tau=1 height
     for i, height in enumerate(tau_heights):
+
         # Set observation position at the tau=1 height for this frequency
         pos = [height, 0, 0]
         los = [180.0, 0.0]  # looking upward
