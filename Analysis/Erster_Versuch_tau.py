@@ -169,7 +169,7 @@ def plot_tau_level(tau_height, filename, title_suffix=""):
     plt.plot(KAYSER_GRID, tau_height / 1000, "-")  # y axis in km
     plt.xlabel("Wavenumber (cm$^{-1}$)")
     plt.ylabel("Height (km)")
-    plt.title(f"Emission height (τ = 1) vs. wavenumber for {title_suffix}")
+    plt.title(f"Emission height at τ = 1 for {title_suffix}")
     plt.grid(True, color='grey', linewidth=0.3)
     # plt.savefig("C:/Users/janni/Desktop/Taulevel_CO2_H2O.pdf")
     # plt.savefig("Taulevel_CO2_H2O.pdf")
