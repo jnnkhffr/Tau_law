@@ -219,6 +219,16 @@ def plot_tau_emission(tau_emission, filename, title_suffix=""):
     plt.savefig(filename)
     plt.show()
 
+def plot_planck_emission(planck_emission, filename, title_suffix=""):
+    fig, ax = plt.subplots()
+    ax.plot(KAYSER_GRID, planck_emission)
+    ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
+    ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
+    ax.set_title(f"Planck emission at τ = 1 level for {title_suffix}")
+    plt.grid(True, color='grey', linewidth=0.3)
+    plt.savefig(filename)
+    plt.show()
+
 
 def main():
 
@@ -251,8 +261,11 @@ def main():
 
         # calculate τ = 1 height and τ
         tau, tau_height = calculate_tau(abs_total)
-        
+
+        # emission temperature
         t_emission = get_temperature_at_tau_heights(tau, atmosphere)
+
+        # planck radiation with emission temperature
         planck_rad = emission_by_temp(t_emission)
         print("Tau shape:", tau.shape)
         print("Height where tau=1 (per frequency):", tau_height)
@@ -274,7 +287,11 @@ def main():
             filename=f"Taulevel_{species_tag}.pdf",
             title_suffix=f"({species_tag})",
         )
-
+        plot_planck_emission(
+            planck_rad,
+            filename=f"Planck_Emission_{species_tag}.pdf",
+            title_suffix=f"({species_tag})",
+        )
 
 if __name__ == "__main__":
     main()
