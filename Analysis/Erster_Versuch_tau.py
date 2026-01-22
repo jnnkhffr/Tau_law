@@ -14,14 +14,14 @@ MIXING_RATIO_CO2 = 400e-6
 MIXING_RATIO_O3 = 1e-6
 T_SURF = 290  # K
 SPECIES_CASES = [
-    ["H2O"],
     ["CO2"],
+    ["H2O"],
     ["O3"],
     ["H2O", "CO2"],
     ["H2O", "CO2", "O3"]
 ]
 
-KAYSER_GRID = np.linspace(1, 2000, 1000)
+KAYSER_GRID = np.linspace(1, 2000, 750)
 FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
 
 
@@ -164,39 +164,41 @@ def calculate_total_flux(spectral_radiance):
 
 def plot_tau_level(tau_height, filename, title_suffix=""):
     plt.figure()
-    plt.plot(KAYSER_GRID, tau_height / 1000, "-")  # y axis in km
+    plt.plot(KAYSER_GRID, tau_height / 1000, "-", linewidth=0.7)  # y axis in km
     plt.xlabel("Wavenumber (cm$^{-1}$)")
     plt.ylabel("Height (km)")
     plt.title(f"Emission height at τ = 1 for {title_suffix}")
     plt.grid(True, color='grey', linewidth=0.3)
-    # plt.savefig("C:/Users/janni/Desktop/Taulevel_CO2_H2O.pdf")
-    # plt.savefig("Taulevel_CO2_H2O.pdf")
-    plt.savefig(filename)
-    # plt.savefig("Taulevel_CO2.pdf")
-
+    plt.savefig(f"{filename}.pdf")
+    plt.savefig(f"{filename}.svg")
     plt.show()
+    plt.close()
 
 def plot_tau_emission(tau_emission, filename, title_suffix=""):
 
     fig, ax = plt.subplots()
-    ax.plot(KAYSER_GRID, tau_emission)
+    ax.plot(KAYSER_GRID, tau_emission, linewidth=0.7)
 
     ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
     ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
     ax.set_title(f"OLR at τ = 1 level for {title_suffix}")
     plt.grid(True, color='grey', linewidth=0.3)
-    plt.savefig(filename)
+    plt.savefig(f"{filename}.pdf")
+    plt.savefig(f"{filename}.svg")
     plt.show()
+    plt.close()
 
 def plot_planck_emission(planck_emission, filename, title_suffix=""):
     fig, ax = plt.subplots()
-    ax.plot(KAYSER_GRID, planck_emission)
+    ax.plot(KAYSER_GRID, planck_emission, linewidth=0.7)
     ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
     ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
     ax.set_title(f"Planck emission at τ = 1 level for {title_suffix}")
     plt.grid(True, color='grey', linewidth=0.3)
-    plt.savefig(filename)
+    plt.savefig(f"{filename}.pdf")
+    plt.savefig(f"{filename}.svg")
     plt.show()
+    plt.close()
 
 
 def main():
@@ -213,11 +215,11 @@ def main():
 
     # Drei Fälle: nur H2O, nur CO2, beide zusammen
     SPECIES_CASES = [
-        ["H2O"],
         ["CO2"],
+        ["H2O"],
         ["O3"],
         ["H2O", "CO2"],
-        ["H20", "CO2", "O3"]
+        ["H2O", "CO2", "O3"]
 ]
 
     for species_list in SPECIES_CASES:
@@ -248,17 +250,17 @@ def main():
         # Plots
         plot_tau_emission(
             tau_emission,
-            filename=f"Tau_Emission_{species_tag}.pdf",
+            filename=f"Tau_Emission_{species_tag}",
             title_suffix=f"({species_tag})",
         )
         plot_tau_level(
             tau_height,
-            filename=f"Taulevel_{species_tag}.pdf",
+            filename=f"Taulevel_{species_tag}",
             title_suffix=f"({species_tag})",
         )
         plot_planck_emission(
             planck_rad,
-            filename=f"Planck_Emission_{species_tag}.pdf",
+            filename=f"Planck_Emission_{species_tag}",
             title_suffix=f"({species_tag})",
         )
 
