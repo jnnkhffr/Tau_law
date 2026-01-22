@@ -86,37 +86,6 @@ def calculate_tau(abs_coeff):
 
     return tau, tau_height
 
-
-def set_up_workspace(atmosphere, species_list):
-
-    ws = pa.Workspace()
-    ws.absorption_speciesSet(
-        species=species_list
-    )
-    ws.atmospheric_field = pa.data.to_atmospheric_field(atmosphere)
-
-    ws.surface_fieldPlanet(option='Earth')
-    ws.surface_field["t"] = atmosphere["t"].sel(alt=0).values
-
-    ws.frequency_grid = FREQ_GRID
-
-    ws.ReadCatalogData()
-
-    cutoff = pa.arts.convert.kaycm2freq(25)
-    for band in ws.absorption_bands:
-        ws.absorption_bands[band].cutoff = "ByLine"
-        ws.absorption_bands[band].cutoff_value = cutoff
-
-    ws.absorption_bands.keep_hitran_s(approximate_percentile=90)
-    ws.propagation_matrix_agendaAuto()
-
-    pos = [100e3, 0, 0]
-    los = [180.0, 0.0]
-    ws.ray_pathGeometric(pos=pos, los=los, max_step=1000.0)
-    ws.spectral_radianceClearskyEmission()
-
-    return ws
-
 def spectral_radiance_at_tau_level(tau_heights, atmosphere, species_list):
     ws = pa.Workspace()
     ws.absorption_speciesSet(
@@ -261,16 +230,16 @@ def main():
 
         # calculate τ = 1 height and τ
         tau, tau_height = calculate_tau(abs_total)
+        print("Tau shape:", tau.shape)
+        print("Height where tau=1 (per frequency):", tau_height)
 
         # emission temperature
         t_emission = get_temperature_at_tau_heights(tau_height, atmosphere)
 
         # planck radiation with emission temperature
         planck_rad = emission_by_temp(t_emission)
-        print("Tau shape:", tau.shape)
-        print("Height where tau=1 (per frequency):", tau_height)
 
-        # Radiance at tau=1 level
+        # Radiance at tau=1 level (ARTS)
         tau_emission = spectral_radiance_at_tau_level(
             tau_height, atmosphere, species_list
         )
@@ -295,4 +264,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
