@@ -16,6 +16,13 @@ pa.data.download()
 MIXING_RATIO_CO2 = 400e-6
 MIXING_RATIO_O3 = 1e-6
 T_SURF = 290  # K
+SPECIES_CASES = [
+    ["H2O"],
+    ["CO2"],
+    ["O3"],
+    ["H2O", "CO2"],
+    ["H20", "CO2", "H2="]
+]
 
 KAYSER_GRID = np.linspace(1, 2000, 200)
 FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
@@ -37,32 +44,28 @@ def set_up_atmosphere(temp_profile, pressure_profile, H20_profile, CO2_concentra
     return atm
 
 
-def absorption_coefficient(atmosphere):
-
-    h2o_absorption = pa.recipe.SingleSpeciesAbsorption(species="H2O")
-    co2_absorption = pa.recipe.SingleSpeciesAbsorption(species="CO2")
+def absorption_coefficient(atmosphere, species_list):
+    absorbers = {sp: pa.recipe.SingleSpeciesAbsorption(species=sp) for sp in species_list}
 
     atm_point = pa.arts.AtmPoint()
-    atm_point["CO2"] = MIXING_RATIO_CO2
-
     temps = atmosphere["t"].values
     pressures = atmosphere["p"].values
-    h2o_values = atmosphere["H2O"].values
 
     n_levels = len(temps)
-
-    absorption_h2o = np.zeros((n_levels, len(FREQ_GRID)))
-    absorption_co2 = np.zeros((n_levels, len(FREQ_GRID)))
+    abs_dict = {sp: np.zeros((n_levels, len(FREQ_GRID))) for sp in species_list}
 
     for h in range(n_levels):
         atm_point.temperature = temps[h]
         atm_point.pressure = pressures[h]
-        atm_point["H2O"] = h2o_values[h]
 
-        absorption_h2o[h] = h2o_absorption(FREQ_GRID, atm_point)
-        absorption_co2[h] = co2_absorption(FREQ_GRID, atm_point)
+        for sp in species_list:
+            atm_point[sp] = atmosphere[sp].values[h]
+            abs_dict[sp][h] = absorbers[sp](FREQ_GRID, atm_point)
 
-    return absorption_h2o, absorption_co2
+    # Summe aller Species
+    total_abs = sum(abs_dict.values())
+
+    return total_abs, abs_dict
 
 
 def calculate_tau(abs_coeff):
@@ -84,11 +87,11 @@ def calculate_tau(abs_coeff):
     return tau, tau_height
 
 
-def set_up_workspace(atmosphere):
+def set_up_workspace(atmosphere, species_list):
 
     ws = pa.Workspace()
     ws.absorption_speciesSet(
-        species=["H2O", "CO2"]
+        species=species_list
     )
     ws.atmospheric_field = pa.data.to_atmospheric_field(atmosphere)
 
@@ -115,10 +118,10 @@ def set_up_workspace(atmosphere):
     return ws
 
 
-def spectral_radiance_at_tau_level(tau_heights, atmosphere):
+def spectral_radiance_at_tau_level(tau_heights, atmosphere, species_list):
     ws = pa.Workspace()
     ws.absorption_speciesSet(
-        species=["H2O", "CO2"]
+        species=species_list
     )
     ws.atmospheric_field = pa.data.to_atmospheric_field(atmosphere)
 
@@ -160,30 +163,30 @@ def calculate_total_flux(spectral_radiance):
     return np.trapezoid(spectral_radiance[:, 0], FREQ_GRID) * np.pi
 
 
-def plot_tau_level(tau_height):
+def plot_tau_level(tau_height, filename, title_suffix=""):
     plt.figure()
     plt.plot(KAYSER_GRID, tau_height / 1000, "-")  # y axis in km
     plt.xlabel("Wavenumber (cm$^{-1}$)")
     plt.ylabel("Height (km)")
-    plt.title("Emission height (τ = 1) vs. wavenumber for CO$_2$")
+    plt.title(f"Emission height (τ = 1) vs. wavenumber for {title_suffix}")
     plt.grid(True, color='grey', linewidth=0.3)
     # plt.savefig("C:/Users/janni/Desktop/Taulevel_CO2_H2O.pdf")
     # plt.savefig("Taulevel_CO2_H2O.pdf")
-    plt.savefig("Taulevel_H2O.pdf")
+    plt.savefig(filename)
     # plt.savefig("Taulevel_CO2.pdf")
 
     plt.show()
 
-def plot_tau_emission(tau_emission):
+def plot_tau_emission(tau_emission, filename, title_suffix=""):
 
     fig, ax = plt.subplots()
     ax.plot(KAYSER_GRID, tau_emission)
 
     ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
     ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
-    ax.set_title(f"OLA at τ = 1 level for H20 and CO2")
+    ax.set_title(f"OLA at τ = 1 level for {title_suffix}")
     plt.grid(True, color='grey', linewidth=0.3)
-    plt.savefig("Tau_Emission_H2O_CO2.pdf")
+    plt.savefig(filename)
     plt.show()
 
 
@@ -194,24 +197,48 @@ def main():
     global heights
     heights = typhon.physics.pressure2height(pressure_levels)
 
-    atmosphere = set_up_atmosphere(t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2)
+    atmosphere = set_up_atmosphere(
+        t_profile, pressure_levels, wmr_profile, MIXING_RATIO_CO2
+    )
 
-    # calculate absorption coefficient
-    h2o, co2 = absorption_coefficient(atmosphere)
-    abs_coeff = h2o + co2
-    #abs_coeff = co2
-    #abs_coeff = h2o
+    # Drei Fälle: nur H2O, nur CO2, beide zusammen
+    SPECIES_CASES = [
+        ["H2O"],
+        ["CO2"],
+        ["H2O", "CO2"],
+    ]
 
-    # calculate τ = 1 height and τ
-    tau, tau_height = calculate_tau(abs_coeff)
+    for species_list in SPECIES_CASES:
+        species_tag = "_".join(species_list)
+        print("Berechne Fall:", species_list)
 
-    print("Tau shape:", tau.shape)
-    print("Height where tau=1 (per frequency):", tau_height)
-    tau_emission = spectral_radiance_at_tau_level(tau_height, atmosphere)
-    print("tau emission: ", tau_emission)
-    plot_tau_emission(tau_emission)
-    # Plot tau = 1 height vs frequency
-    #plot_tau_level(tau_height)
+
+        # calculate absorption coefficient
+        abs_total, abs_dict = absorption_coefficient(atmosphere, species_list)
+
+        # calculate τ = 1 height and τ
+        tau, tau_height = calculate_tau(abs_total)
+
+        print("Tau shape:", tau.shape)
+        print("Height where tau=1 (per frequency):", tau_height)
+
+        # Radiance at tau=1 level
+        tau_emission = spectral_radiance_at_tau_level(
+            tau_height, atmosphere, species_list
+        )
+        print("tau emission: ", tau_emission)
+
+        # Plots
+        plot_tau_emission(
+            tau_emission,
+            filename=f"Tau_Emission_{species_tag}.pdf",
+            title_suffix=f"({species_tag})",
+        )
+        plot_tau_level(
+            tau_height,
+            filename=f"Taulevel_{species_tag}.pdf",
+            title_suffix=f"({species_tag})",
+        )
 
 
 if __name__ == "__main__":
