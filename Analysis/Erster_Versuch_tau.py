@@ -182,7 +182,7 @@ def plot_tau_emission(tau_emission, filename, title_suffix=""):
     ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
     ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
     ax.set_title(f"OLR at τ = 1 level for {title_suffix}")
-    plt.grid(True, color='grey', linewidth=0.3)
+    ax.grid(True, color='grey', linewidth=0.3)
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg")
     plt.show()
@@ -194,11 +194,52 @@ def plot_planck_emission(planck_emission, filename, title_suffix=""):
     ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
     ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
     ax.set_title(f"Planck emission at τ = 1 level for {title_suffix}")
-    plt.grid(True, color='grey', linewidth=0.3)
+    ax.grid(True, color='grey', linewidth=0.3)
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg")
     plt.show()
     plt.close()
+
+
+#Ab hier die Scatter PLots
+def plot_tau_level_scatter(tau_height, filename, title_suffix=""):
+    plt.figure()
+    plt.scatter(KAYSER_GRID, tau_height / 1000, s=1)  # s = Markergröße
+    plt.xlabel("Wavenumber (cm$^{-1}$)")
+    plt.ylabel("Height (km)")
+    plt.title(f"Emission height at τ = 1 for {title_suffix}")
+    plt.grid(True, color='grey', linewidth=0.3)
+
+    plt.savefig(f"{filename}_scatter.pdf")
+    plt.savefig(f"{filename}_scatter.svg")
+    plt.close()
+
+def plot_tau_emission_scatter(tau_emission, filename, title_suffix=""):
+    fig, ax = plt.subplots()
+    ax.scatter(KAYSER_GRID, tau_emission, s=1)
+
+    ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
+    ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
+    ax.set_title(f"OLR at τ = 1 level for {title_suffix}")
+    ax.grid(True, color='grey', linewidth=0.3)
+
+    plt.savefig(f"{filename}_scatter.pdf")
+    plt.savefig(f"{filename}_scatter.svg")
+    plt.close()
+
+def plot_planck_emission_scatter(planck_emission, filename, title_suffix=""):
+    fig, ax = plt.subplots()
+    ax.scatter(KAYSER_GRID, planck_emission, s=1)
+
+    ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
+    ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
+    ax.set_title(f"Planck emission at τ = 1 level for {title_suffix}")
+    ax.grid(True, color='grey', linewidth=0.3)
+
+    plt.savefig(f"{filename}_scatter.pdf")
+    plt.savefig(f"{filename}_scatter.svg")
+    plt.close()
+
 
 
 def main():
@@ -259,6 +300,22 @@ def main():
             title_suffix=f"({species_tag})",
         )
         plot_planck_emission(
+            planck_rad,
+            filename=f"Planck_Emission_{species_tag}",
+            title_suffix=f"({species_tag})",
+        )
+        #Scatter
+        plot_tau_emission_scatter(
+            tau_emission,
+            filename=f"Tau_Emission_{species_tag}",
+            title_suffix=f"({species_tag})",
+        )
+        plot_tau_level_scatter(
+            tau_height,
+            filename=f"Taulevel_{species_tag}",
+            title_suffix=f"({species_tag})",
+        )
+        plot_planck_emission_scatter(
             planck_rad,
             filename=f"Planck_Emission_{species_tag}",
             title_suffix=f"({species_tag})",
