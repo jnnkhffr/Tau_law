@@ -275,9 +275,25 @@ def plot_OLR_at_TOA(radiance, filename, title_suffix=""):
     ax.set_title(f"OLR at TOA for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
 
-    plt.savefig(f"{filename}_OLR_TOA.pdf")
-    plt.savefig(f"{filename}_OLR_TOA.svg", bbox_inches="tight")
+    plt.savefig(f"{filename}.pdf")
+    plt.savefig(f"{filename}.svg", bbox_inches="tight")
     plt.show(block=False)
+
+
+def plot_OLR_diff(olr_diff, filename, title_suffix=""):
+    fig, ax = plt.subplots()
+    label = ["difference to ARTS", "difference to Planck"]
+    for i in range(len(olr_diff)):
+        ax.plot(KAYSER_GRID, olr_diff[i], linewidth=0.7, label=label[i])
+    ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
+    ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
+    ax.set_title(f"difference in OLR at TOA minus OLR at emission level for {title_suffix}")
+    ax.grid(True, color='grey', linewidth=0.3)
+
+    plt.savefig(f"{filename}.pdf")
+    plt.savefig(f"{filename}.svg", bbox_inches="tight")
+    plt.show(block=False)
+
 
 def main():
 
@@ -329,8 +345,11 @@ def main():
         olr_toa = spectral_radiance_at_toa(atmosphere, species_list)
 
         # OLR difference at OLR TOA - OLR at tau = 1
+        olr_diffs = []
         olr_diff_arts = olr_toa - tau_emission
+        olr_diffs.append(olr_diff_arts)
         olr_diff_planck = olr_toa - planck_rad
+        olr_diffs.append(olr_diff_planck)
 
         # Plots
         plot_tau_emission(
@@ -370,6 +389,10 @@ def main():
             filename=f"OLR_TOA_{species_tag}",
             title_suffix=f"({species_tag})"
         )
-
+        plot_OLR_diff(
+            olr_diffs,
+            filename=f"OLR_diff_to_emission_level_for_{species_tag}",
+            title_suffix=f"({species_tag})"
+        )
 if __name__ == "__main__":
     main()
