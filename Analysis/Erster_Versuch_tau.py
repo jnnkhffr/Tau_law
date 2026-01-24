@@ -158,10 +158,7 @@ def spectral_radiance_at_toa(atmosphere, species_list):
     return ws.spectral_radiance[:, 0]
 
 def emission_by_temp(temperature):
-    planck_rad = []
-    for t in temperature:
-        planck_rad.append(typhon.physics.planck(FREQ_GRID, t))
-    return np.array(planck_rad)
+    return typhon.physics.planck(FREQ_GRID, temperature)
 
 def get_temperature_at_tau_heights(tau_heights, atmosphere):
     """
