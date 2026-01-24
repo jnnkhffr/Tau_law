@@ -288,7 +288,7 @@ def plot_OLR_diff(olr_diff, filename, title_suffix=""):
         ax.plot(KAYSER_GRID, olr_diff[i], linewidth=0.7, label=label[i])
     ax.set_xlabel("Frequency / Kayser (cm$^{-1}$)")
     ax.set_ylabel(r"Spectral radiance ($Wm^{-2}sr^{-1}Hz^{-1}$)")
-    ax.set_title(f"difference in OLR at TOA minus OLR at emission level for {title_suffix}")
+    ax.set_title(f"difference in OLR at TOA minus OLR at emission level  \n for {title_suffix}")
     ax.legend(loc="lower right")
     ax.grid(True, color='grey', linewidth=0.3)
 
