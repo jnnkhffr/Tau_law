@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -156,8 +155,10 @@ def spectral_radiance_at_toa(atmosphere, species_list):
     return ws.spectral_radiance[:, 0]
 
 def emission_by_temp(temperature):
-    planck_rad = typhon.physics.planck(FREQ_GRID, temperature)
-    return planck_rad
+    planck_rad = []
+    for t in temperature:
+        planck_rad.append(typhon.physics.planck(FREQ_GRID, t))
+    return np.array(planck_rad)
 
 def get_temperature_at_tau_heights(tau_heights, atmosphere):
     """
