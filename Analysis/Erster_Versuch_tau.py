@@ -278,7 +278,8 @@ def plot_OLR_at_TOA(radiance, filename, title_suffix=""):
 
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg", bbox_inches="tight")
-    plt.show(block=False)
+    #plt.show(block=False)
+    plt.close()
 
 
 def plot_OLR_diff(olr_diff, filename, title_suffix=""):
@@ -294,8 +295,8 @@ def plot_OLR_diff(olr_diff, filename, title_suffix=""):
 
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg", bbox_inches="tight")
-    plt.show(block=False)
-
+    #plt.show(block=False)
+    plt.close()
 
 def main():
     start_time = time.time()  # Startzeit des Codes (Just for Fun)
