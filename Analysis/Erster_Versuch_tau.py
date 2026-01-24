@@ -349,8 +349,10 @@ def main():
 
         # OLR difference at OLR TOA - OLR at tau = 1
         olr_diffs = []
+
         olr_diff_arts = olr_toa - tau_emission
         olr_diffs.append(olr_diff_arts)
+
         olr_diff_planck = olr_toa - planck_rad
         olr_diffs.append(olr_diff_planck)
 
