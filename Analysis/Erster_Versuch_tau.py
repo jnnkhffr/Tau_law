@@ -204,6 +204,8 @@ def plot_tau_level(tau_height, filename, title_suffix=""):
 
 def plot_tau_emission(tau_emission, filename, title_suffix=""):
 
+    flux = calculate_total_flux(tau_emission)
+
     fig, ax = plt.subplots()
     ax.plot(KAYSER_GRID, tau_emission, linewidth=0.7)
 
@@ -211,18 +213,34 @@ def plot_tau_emission(tau_emission, filename, title_suffix=""):
     ax.set_ylabel(r"OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
     ax.set_title(f"OLR at τ = 1 level for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
+    ax.text(
+        0.98, 0.98,  # X and Y coordinates (in axes fraction)
+        f"Total OLR = {flux:.2f} W/m²",  # Text to display
+        transform=ax.transAxes,  # Use axes coordinates (0–1)
+        fontsize=10,  # Font size
+        verticalalignment='top',  # Align top
+        horizontalalignment='right')
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg", bbox_inches="tight")
     #plt.show()
     plt.close()
 
 def plot_planck_emission(planck_emission, filename, title_suffix=""):
+    flux = calculate_total_flux(planck_emission)
+
     fig, ax = plt.subplots()
     ax.plot(KAYSER_GRID, planck_emission, linewidth=0.7)
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
     ax.set_ylabel(r"OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
     ax.set_title(f"Planck emission at τ = 1 level for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
+    ax.text(
+        0.98, 0.98,  # X and Y coordinates (in axes fraction)
+        f"Total OLR = {flux:.2f} W/m²",  # Text to display
+        transform=ax.transAxes,  # Use axes coordinates (0–1)
+        fontsize=10,  # Font size
+        verticalalignment='top',  # Align top
+        horizontalalignment='right')
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg", bbox_inches="tight")
     #plt.show()
@@ -269,13 +287,21 @@ def plot_planck_emission_scatter(planck_emission, filename, title_suffix=""):
     plt.close()
 
 def plot_OLR_at_TOA(radiance, filename, title_suffix=""):
+    flux = calculate_total_flux(radiance)
+
     fig, ax = plt.subplots()
     ax.plot(KAYSER_GRID, radiance, linewidth=0.7)
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
     ax.set_ylabel(r"OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
     ax.set_title(f"OLR at TOA for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
-
+    ax.text(
+        0.98, 0.98,  # X and Y coordinates (in axes fraction)
+        f"Total OLR = {flux:.2f} W/m²",  # Text to display
+        transform=ax.transAxes,  # Use axes coordinates (0–1)
+        fontsize=10,  # Font size
+        verticalalignment='top',  # Align top
+        horizontalalignment='right')
     plt.savefig(f"{filename}.pdf")
     plt.savefig(f"{filename}.svg", bbox_inches="tight")
     #plt.show(block=False)
@@ -286,7 +312,9 @@ def plot_OLR_diff(olr_diff, filename, title_suffix=""):
     fig, ax = plt.subplots()
     label = ["difference to ARTS", "difference to Planck"]
     for i in range(len(olr_diff)):
-        ax.plot(KAYSER_GRID, olr_diff[i], linewidth=0.7, label=label[i])
+        flux = calculate_total_flux(olr_diff[i])
+        ax.plot(KAYSER_GRID, olr_diff[i], linewidth=0.7,
+                label=f"{label[i]}, $\Delta$ OLR = {flux:.2f} W/m²")
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
     ax.set_ylabel(r"$\Delta OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
     ax.set_title(f"OLR at TOA - OLR at τ = 1 for \n {title_suffix}")
