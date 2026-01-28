@@ -289,7 +289,7 @@ def plot_OLR_diff(olr_diff, filename, title_suffix=""):
         ax.plot(KAYSER_GRID, olr_diff[i], linewidth=0.7, label=label[i])
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
     ax.set_ylabel(r"$\Delta OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
-    ax.set_title(f"OLR at TOA minus OLR at emission height for \n {title_suffix}")
+    ax.set_title(f"OLR at TOA - OLR at τ = 1 for \n {title_suffix}")
     ax.legend(loc="lower right")
     ax.grid(True, color='grey', linewidth=0.3)
 
