@@ -21,7 +21,7 @@ SPECIES_CASES = [
     ["H2O", "CO2", "O3"]
 ]
 
-KAYSER_GRID = np.linspace(1, 2000, 300)
+KAYSER_GRID = np.linspace(1, 2000, 10)
 FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
 
 
@@ -210,7 +210,7 @@ def plot_tau_emission(tau_emission, filename, title_suffix=""):
     ax.plot(KAYSER_GRID, tau_emission, linewidth=0.7)
 
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
-    ax.set_ylabel(r"OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
+    ax.set_ylabel(r"$OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
     ax.set_title(f"OLR at τ = 1 level for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
     ax.text(
@@ -231,7 +231,7 @@ def plot_planck_emission(planck_emission, filename, title_suffix=""):
     fig, ax = plt.subplots()
     ax.plot(KAYSER_GRID, planck_emission, linewidth=0.7)
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
-    ax.set_ylabel(r"OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
+    ax.set_ylabel(r"$OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
     ax.set_title(f"Planck emission at τ = 1 level for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
     ax.text(
@@ -278,7 +278,7 @@ def plot_planck_emission_scatter(planck_emission, filename, title_suffix=""):
     ax.scatter(KAYSER_GRID, planck_emission, s=1)
 
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
-    ax.set_ylabel(r"OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
+    ax.set_ylabel(r"$OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
     ax.set_title(f"Planck emission at τ = 1 level for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
 
@@ -292,7 +292,7 @@ def plot_OLR_at_TOA(radiance, filename, title_suffix=""):
     fig, ax = plt.subplots()
     ax.plot(KAYSER_GRID, radiance, linewidth=0.7)
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
-    ax.set_ylabel(r"OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
+    ax.set_ylabel(r"$OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
     ax.set_title(f"OLR at TOA for {title_suffix}")
     ax.grid(True, color='grey', linewidth=0.3)
     ax.text(
@@ -314,7 +314,7 @@ def plot_OLR_diff(olr_diff, filename, title_suffix=""):
     for i in range(len(olr_diff)):
         flux = calculate_total_flux(olr_diff[i])
         ax.plot(KAYSER_GRID, olr_diff[i], linewidth=0.7,
-                label=f"{label[i]}, $\Delta$ OLR = {flux:.2f} W/m²")
+                label=f"{label[i]} \n $\Delta$ OLR = {flux:.2f} W/m²")
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
     ax.set_ylabel(r"$\Delta OLR_{\nu}$ $\left[ \frac{W}{m^{2}cm^{-1}sr} \right]$")
     ax.set_title(f"OLR at TOA - OLR at τ = 1 for \n {title_suffix}")
