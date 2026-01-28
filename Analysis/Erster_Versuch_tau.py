@@ -21,7 +21,7 @@ SPECIES_CASES = [
     ["H2O", "CO2", "O3"]
 ]
 
-KAYSER_GRID = np.linspace(1, 2000, 10)
+KAYSER_GRID = np.linspace(1, 2000, 300)
 FREQ_GRID = pa.arts.convert.kaycm2freq(KAYSER_GRID)
 
 
