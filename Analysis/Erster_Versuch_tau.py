@@ -187,7 +187,7 @@ def get_temperature_at_tau_heights(tau_heights, atmosphere):
     return tau_temperatures
 
 def calculate_total_flux(spectral_radiance):
-    return np.trapezoid(spectral_radiance[:, 0], FREQ_GRID) * np.pi
+    return np.trapezoid(spectral_radiance, FREQ_GRID) * np.pi
 
 
 def plot_tau_level(tau_height, filename, title_suffix=""):
